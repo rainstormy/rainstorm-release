@@ -1,0 +1,19 @@
+name: Rainstorm release / GitHub
+
+on:
+  workflow_call:
+    secrets: inherit
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  create-github-release:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Create a draft GitHub release
+        uses: rainstormy-actions/release/github@e9b2ac5cc4a0a1288cce53dd3021b9ed2c8b42f8
+        with:
+          gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+          version: ${{ github.ref_name }}
