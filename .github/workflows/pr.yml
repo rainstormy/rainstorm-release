@@ -1,0 +1,54 @@
+name: Rainstorm release / Pull request
+
+on:
+  workflow_call:
+    secrets: inherit
+    inputs:
+      release-artifacts-cache-key:
+        description: The cache key supplied to `actions/cache` that identifies the release artifacts to be included in the pull request.
+        type: string
+        required: true
+      #
+      release-artifacts-cache-path:
+        description: The path supplied to `actions/cache` that defines the locations of the release artifacts to be included in the pull request.
+        type: string
+        required: true
+      #
+      version:
+        description: A string that contains a semantic version number on the form `<major>.<minor>.<patch>[-prerelease][+buildinfo]`.
+        type: string
+        required: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # https://github.com/actions/checkout/releases/tag/v4.1.1
+        with:
+          # Use a separate access token with permission to commit and push.
+          token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+        #
+      - name: Restore release artifacts from the cache
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # https://github.com/actions/cache/releases/tag/v4.0.2
+        with:
+          key: ${{ inputs.release-artifacts-cache-key }}
+          path: ${{ inputs.release-artifacts-cache-path }}
+          fail-on-cache-miss: true # The caller workflow must generate release artifacts prior to this step to ensure an exact cache hit.
+        #
+      - name: Use Nimbus (Bot) in Git
+        uses: .github/actions/nimbus
+        with:
+          bot-nimbus-ssh-public-key: ${{ secrets.BOT_NIMBUS_SSH_PUBLIC_KEY }}
+          bot-nimbus-ssh-__private__-key: ${{ secrets.BOT_NIMBUS_SSH___THE___PRIVATE___KEY }}
+          ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
+        #
+      - name: Create a release pull request
+        uses: rainstormy-actions/release/pr@e9b2ac5cc4a0a1288cce53dd3021b9ed2c8b42f8
+        with:
+          gh-auth-token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+          version: ${{ inputs.version }}
