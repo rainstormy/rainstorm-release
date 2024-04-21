@@ -1,0 +1,33 @@
+name: Rainstorm release / Tag
+
+on:
+  workflow_call:
+    secrets: inherit
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  create-git-tag:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions: { }
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # https://github.com/actions/checkout/releases/tag/v4.1.1
+        with:
+          # Use a separate access token to allow the push tag event in this workflow to trigger subsequent workflows, e.g. `github.yml` and `npm.yml`.
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
+        #
+      - name: Use Nimbus (Bot) in Git
+        uses: .github/actions/nimbus
+        with:
+          bot-nimbus-ssh-public-key: ${{ secrets.BOT_NIMBUS_SSH_PUBLIC_KEY }}
+          bot-nimbus-ssh-__private__-key: ${{ secrets.BOT_NIMBUS_SSH___THE___PRIVATE___KEY }}
+          ssh-key-fingerprints-github: ${{ secrets.SSH_KEY_FINGERPRINTS_GITHUB }}
+        #
+      - name: Create a release tag
+        uses: rainstormy-actions/release/tag@e9b2ac5cc4a0a1288cce53dd3021b9ed2c8b42f8
+        with:
+          version: ${{ github.head_ref }}
