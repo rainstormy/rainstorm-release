@@ -1,0 +1,40 @@
+name: Rainstorm release / npm
+
+on:
+  workflow_call:
+    secrets: inherit
+    inputs:
+      release-artifacts-cache-key:
+        description: The cache key supplied to `actions/cache` that identifies the release artifacts to be included in the published package.
+        type: string
+        required: true
+      #
+      release-artifacts-cache-path:
+        description: The path supplied to `actions/cache` that defines the locations of the release artifacts to be included in the published package.
+        type: string
+        required: true
+
+# All third-party actions are pinned to a specific commit SHA for security reasons.
+# https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions
+jobs:
+  publish-npm-package:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 1
+    permissions:
+      contents: read # Allow the job to check out the repository.
+      id-token: write # Allow npm to publish the package with provenance.
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # https://github.com/actions/checkout/releases/tag/v4.1.1
+        #
+      - name: Restore release artifacts from the cache
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # https://github.com/actions/cache/releases/tag/v4.0.2
+        with:
+          key: ${{ inputs.release-artifacts-cache-key }}
+          path: ${{ inputs.release-artifacts-cache-path }}
+          fail-on-cache-miss: true # The caller workflow must generate release artifacts prior to this step to ensure an exact cache hit.
+        #
+      - name: Publish the package to npm
+        uses: rainstormy-actions/release/npm@e9b2ac5cc4a0a1288cce53dd3021b9ed2c8b42f8
+        with:
+          npm-auth-token: ${{ secrets.BOT_NIMBUS_NPM_TOKEN }}
