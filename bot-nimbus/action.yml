@@ -7,7 +7,7 @@ inputs:
     description: The public key of the SSH key for signing commits and tags.
     required: true
   #
-  bot-nimbus-ssh-__private__-key:
+  __bot-nimbus-ssh-private-key__:
     description: The private key of the SSH key for signing commits and tags. It is stored temporarily on the GitHub Actions runner in `~/.ssh/id_ed25519`.
     required: true
   #
@@ -20,18 +20,18 @@ runs:
   steps:
     - name: Configure the user identity in Git
       run: |
-        git config user.email "146315497+rainstormybot-nimbus@users.noreply.github.com"
-        git config user.name "Nimbus (Bot)"
+        git config user.email '146315497+rainstormybot-nimbus@users.noreply.github.com'
+        git config user.name 'Nimbus (Bot)'
         git config user.signingkey "$BOT_NIMBUS_SSH_PUBLIC_KEY"
-        git config gpg.format "ssh"
-        git config commit.gpgsign "true"
-        git config tag.gpgsign "true"
+        git config gpg.format 'ssh'
+        git config commit.gpgsign 'true'
+        git config tag.gpgsign 'true'
       env:
         BOT_NIMBUS_SSH_PUBLIC_KEY: ${{ inputs.bot-nimbus-ssh-public-key }}
       shell: bash
       #
     - name: Install the signing key
-      uses: rainstormy-actions/ssh-key/install@085582ea80083c45747557ecbcf8414ea67c31dd
+      uses: rainstormy-actions/ssh-key/install@b98998bd8f13b4935298eb2d2cb84b4728fde807
       with:
         known-hosts: ${{ inputs.ssh-key-fingerprints-github }}
-        __private__-key: ${{ inputs.bot-nimbus-ssh-__private__-key }}
+        __private-key__: ${{ inputs.__bot-nimbus-ssh-private-key__ }}
