@@ -32,7 +32,7 @@ runs:
       shell: bash
       #
     - name: Install the signing key
-      uses: rainstormy-actions/ssh-key/install@b98998bd8f13b4935298eb2d2cb84b4728fde807
+      uses: rainstormy-actions/ssh-key/install@cf4f4732bebebd7f0ee036c568232b5dc5616b07 # https://github.com/rainstormy-actions/ssh-key/releases/tag/v1.0.0
       with:
         known-hosts: ${{ inputs.ssh-key-fingerprints-github }}
         __private-key__: ${{ inputs.__bot-nimbus-ssh-private-key__ }}
