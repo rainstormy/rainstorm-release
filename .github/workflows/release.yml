@@ -50,7 +50,7 @@ jobs:
           token: ${{ secrets.BOT_NIMBUS_GH_AUTH_TOKEN }}
         #
       - name: Update release artifacts
-        uses: rainstormy/updraft@main # This is a prerelease version.
+        uses: rainstormy/updraft@23bb449c54a4e967c87a6943a1ef9a237eafdb99 # v1.2.0
         with:
           check-sequential-release: true
           release-files: CHANGELOG.md
